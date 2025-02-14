@@ -41,13 +41,40 @@ class FileParser {
         csvString = const Utf8Decoder(allowMalformed: true).convert(bytes);
       }
 
-      final rows = const CsvToListConverter().convert(csvString);
+      // 使用更严格的CSV解析选项
+      final converter = CsvToListConverter(
+        shouldParseNumbers: false,  // 防止自动解析数字
+        fieldDelimiter: ',',  // 显式指定分隔符
+        eol: '\n',  // 显式指定换行符
+      );
+
+      final rows = converter.convert(csvString, shouldParseNumbers: false);
       if (rows.isEmpty) {
         throw Exception('CSV文件为空');
       }
 
+      // 确保头部行是字符串
       final headers = rows.first.map((h) => h.toString().trim()).toList();
-      return _createDataSource(fileName, headers, rows.skip(1).toList());
+
+      // 验证列数
+      if (headers.isEmpty) {
+        throw Exception('无法识别CSV文件的列头');
+      }
+
+      // 验证数据行的列数
+      final dataRows = rows.skip(1).map((row) {
+        if (row.length != headers.length) {
+          // 如果列数不匹配，进行裁剪或填充
+          if (row.length > headers.length) {
+            return row.sublist(0, headers.length);
+          } else {
+            return [...row, ...List.filled(headers.length - row.length, '')];
+          }
+        }
+        return row;
+      }).toList();
+
+      return _createDataSource(fileName, headers, dataRows);
     } catch (e) {
       print('CSV parsing error: $e');
       rethrow;

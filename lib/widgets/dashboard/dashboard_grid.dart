@@ -4,6 +4,8 @@ import 'package:flutter_grid_layout/flutter_grid_layout.dart';
 import '../../models/models.dart';
 import '../dashboard/chart_container.dart';
 import 'dart:math' show max;
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class DashboardGrid extends StatelessWidget {
   final List<ChartWidget> charts;
@@ -18,6 +20,14 @@ class DashboardGrid extends StatelessWidget {
     required this.onEditChart,
     required this.onDeleteChart,
   });
+
+  bool get isMobile {
+    if (kIsWeb) {
+      return MediaQueryData.fromWindow(WidgetsBinding.instance.window)
+          .size.width < 600;
+    }
+    return !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,36 +54,43 @@ class DashboardGrid extends StatelessWidget {
       );
     }
 
-    // 计算网格大小
-    double maxRow = 0;
-    double maxCol = 0;
-    layout.forEach((chartId, pos) {
-      final row = pos['row'] + pos['height'];
-      final col = pos['col'] + pos['width'];
-      maxRow = max(maxRow, row);
-      maxCol = max(maxCol, col);
-    });
-
-    // 确保至少有2行2列
-    maxRow = max(maxRow, 2.0);
-    maxCol = max(maxCol, 2.0);
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 计算每个网格单元的宽度和高度
-        final gridWidth = constraints.maxWidth;
-        final gridHeight = constraints.maxHeight;
-        final columnWidth = gridWidth / 2;
-        final rowHeight = gridHeight / maxRow.ceil();
+        if (isMobile) {
+          // 移动端使用 ListView
+          return ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: charts.length,
+            itemBuilder: (context, index) {
+              final chart = charts[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: ChartContainer(
+                  chart: chart,
+                  onEdit: () => onEditChart(chart),
+                  onDelete: () => onDeleteChart(chart),
+                ),
+              );
+            },
+          );
+        }
+
+        // 桌面端保持原有的网格布局
+        double maxRow = 0;
+        double maxCol = 0;
+        layout.forEach((chartId, pos) {
+          maxRow = max(maxRow, (pos['row'] ?? 0) + (pos['height'] ?? 1));
+          maxCol = max(maxCol, (pos['col'] ?? 0) + (pos['width'] ?? 1));
+        });
+
+        maxRow = max(maxRow, 2.0);
+        maxCol = max(maxCol, 2.0);
 
         return GridContainer(
-          columns: [
-            columnWidth / gridWidth,
-            columnWidth / gridWidth
-          ],
+          columns: [0.5, 0.5],
           rows: List.generate(
-              maxRow.ceil(),
-                  (index) => rowHeight / gridHeight
+            maxRow.ceil(),
+                (index) => 1.0 / maxRow,
           ),
           children: charts.map((chart) {
             final itemLayout = layout[chart.id] ?? {

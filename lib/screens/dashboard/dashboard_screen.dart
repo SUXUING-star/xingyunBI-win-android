@@ -66,20 +66,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 56, // 减少高度
         title: GestureDetector(
           child: Row(
             children: [
-              Text(currentDashboard.name),
-              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  currentDashboard.name,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: _showEditNameDialog,
-                  tooltip: "编辑仪表盘名称",
+                icon: const Icon(Icons.edit, size: 20),
+                onPressed: _showEditNameDialog,
+                tooltip: "编辑仪表盘名称",
               )
             ],
           ),
         ),
         actions: [
+          // 保持原有的操作按钮
           SegmentedButton<int>(
             segments: const [
               ButtonSegment<int>(value: 2, label: Text('每行两个')),
@@ -106,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0), // 减少内边距
         child: DashboardGrid(
           charts: currentDashboard.charts,
           layout: currentDashboard.layout,

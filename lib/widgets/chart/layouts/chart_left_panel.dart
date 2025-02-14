@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../../models/models.dart';
+import 'dart:io';
 
 class ChartLeftPanel extends StatefulWidget {
   final DataSource? selectedDataSource;
@@ -20,25 +21,26 @@ class ChartLeftPanel extends StatefulWidget {
 class _ChartLeftPanelState extends State<ChartLeftPanel> {
   @override
   Widget build(BuildContext context) {
+    final isAndroid = Platform.isAndroid;
     return SizedBox(
-      width: 200,
+      width: isAndroid? 120 : 200,
       child: Column(
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isAndroid? 8.0 : 16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     '选择数据源',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: isAndroid? 12.0 : 16.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: isAndroid? 8.0 : 16.0),
                   ValueListenableBuilder(
                     valueListenable: Hive.box('dataSources').listenable(),
                     builder: (context, box, child) {
@@ -79,7 +81,7 @@ class _ChartLeftPanelState extends State<ChartLeftPanel> {
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isAndroid? 4.0 : 8.0),
           Expanded(
             child: widget.selectedDataSource == null
                 ? const Card(
@@ -100,17 +102,18 @@ class _FieldList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAndroid = Platform.isAndroid;
     return Card(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
+          Padding(
+            padding: EdgeInsets.all(isAndroid? 8.0 : 16.0),
             child: Text(
               '可用字段',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: isAndroid? 12.0 : 16.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -129,6 +132,7 @@ class _FieldList extends StatelessWidget {
   }
 
   Widget _buildDraggableField(Field field) {
+    final isAndroid = Platform.isAndroid;
     return Draggable<Field>(
       data: field,
       feedback: Material(

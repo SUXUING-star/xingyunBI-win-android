@@ -1,26 +1,38 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'app.dart';
-import 'core/init/hive_init.dart';
-import 'package:window_manager/window_manager.dart';
+import 'core/providers/initialization_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 初始化 Hive
-  final appDocumentDir = await getApplicationDocumentsDirectory();
-  await HiveInit.init(appDocumentDir.path);
+  // 设置安卓横屏模式
+  if (Platform.isAndroid) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
 
-  // 如果是桌面平台，初始化窗口管理器
+    // 可选：设置全屏模式
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+    );
+  }
+
+  // 桌面平台窗口设置
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = const WindowOptions(
       size: Size(1280, 720),
       center: true,
-      title: "星云BI（windows版）",  // 这里设置中文标题
+      title: "星云BI",
       minimumSize: Size(800, 600),
     );
 
@@ -30,5 +42,13 @@ void main() async {
     });
   }
 
-  runApp(const App());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => InitializationProvider()),
+      ],
+      child: const App(),
+    ),
+  );
 }
+

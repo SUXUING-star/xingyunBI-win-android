@@ -22,58 +22,63 @@ class _DataSourceScreenState extends State<DataSourceScreen> {
       appBar: AppBar(
         title: const Text('导入数据源'),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Card(
+      body: SingleChildScrollView( // 添加顶层滚动
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Padding(
               padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Icon(
-                    Icons.upload_file,
-                    size: 48,
-                    color: Colors.blue,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '上传数据文件',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '支持 CSV 和 Excel 文件格式',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-
-                  if (isLoading)
-                    const Center(child: CircularProgressIndicator())
-                  else
-                    FileUploadWidget(
-                      onFileSelected: _handleFileSelected,
-                    ),
-
-                  if (error != null) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Icon(
+                        Icons.upload_file,
+                        size: 48,
+                        color: Colors.blue,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      Text(
+                        '上传数据文件',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '支持 CSV 和 Excel 文件格式',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
 
-                  const SizedBox(height: 32),
-                  const _FileFormatInfo(),
-                ],
+                      if (isLoading)
+                        const Center(child: CircularProgressIndicator())
+                      else
+                        FileUploadWidget(
+                          onFileSelected: _handleFileSelected,
+                        ),
+
+                      if (error != null) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+
+                      const SizedBox(height: 32),
+                      const _FileFormatInfo(),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -135,14 +140,14 @@ class _FileFormatInfo extends StatelessWidget {
           '支持的文件格式',
           style: Theme.of(context).textTheme.titleMedium,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         _buildFormatTile(
           context,
           icon: Icons.table_chart,
           title: 'CSV 文件',
           description: '包含表头的 CSV 文件，使用逗号或制表符分隔',
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _buildFormatTile(
           context,
           icon: Icons.table_view,
@@ -152,6 +157,7 @@ class _FileFormatInfo extends StatelessWidget {
       ],
     );
   }
+
 
   Widget _buildFormatTile(
       BuildContext context, {

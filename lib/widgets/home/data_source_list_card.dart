@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/models.dart';
 import '../../widgets/datasource/data_source_preview.dart';
+import 'dart:io';
 
 class DataSourceListCard extends StatelessWidget {
   const DataSourceListCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isAndroid = Platform.isAndroid;
+
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
@@ -17,7 +20,7 @@ class DataSourceListCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isAndroid ? 8.0 : 16.0),
             child: Row(
               children: [
                 Expanded(
@@ -56,34 +59,29 @@ class DataSourceListCard extends StatelessWidget {
     );
   }
 }
-
 class _EmptyDataSourceState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isAndroid = Platform.isAndroid;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(isAndroid ? 16.0 : 32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.storage_outlined,
-              size: 80,
+              size: isAndroid && screenWidth < 600 ? 32 : 50,
               color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isAndroid && screenWidth < 600 ? 4 : 8),
             Text(
               '暂无数据源',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
-            Text(
-              '点击右上角按钮添加您的第一个数据源',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
+
           ],
         ),
       ),
@@ -98,16 +96,30 @@ class _DataSourceListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAndroid = Platform.isAndroid;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(
+        vertical: isAndroid ? 4.0 : 8.0,
+      ),
       itemCount: dataSources.length,
       separatorBuilder: (context, index) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final source = dataSources[index];
         return ListTile(
-          title: Text(source.name),
+          dense: isAndroid && screenWidth < 600,
+          visualDensity: isAndroid && screenWidth < 600
+              ? VisualDensity.compact
+              : VisualDensity.standard,
+          title: Text(
+            source.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           subtitle: Text(
             '${source.records.length} 条记录',
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,

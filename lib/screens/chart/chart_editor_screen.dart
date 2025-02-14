@@ -59,28 +59,28 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            // 数据源选择区域
-            ChartLeftPanel(
+      body: Row(
+        children: [
+          // 左侧数据源选择区域
+          SizedBox(
+            width: 180, // 略微缩小宽度
+            child: ChartLeftPanel(
               selectedDataSource: selectedDataSource,
               onDataSourceChanged: (value) {
                 setState(() {
                   selectedDataSource = value;
-                  // 清空已选择的维度和度量
                   dimensions.clear();
                   measures.clear();
                 });
               },
             ),
+          ),
 
-            const SizedBox(width: 16),
-
-            // 中间区域: 图表名称 + 图表预览 + 维度度量拖拽区
-            Expanded(
-              flex: 2,
+          // 中间区域
+          Expanded(
+            flex: 3, // 增加中间区域的权重
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Column(
                 children: [
                   // 图表名称输入
@@ -88,17 +88,18 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
                     controller: nameController,
                     decoration: const InputDecoration(
                       labelText: '图表名称',
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
 
                   // 图表预览区域
                   Expanded(
                     flex: 2,
                     child: Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(8),
                         child: selectedDataSource == null
                             ? const Center(child: Text('请选择数据源'))
                             : ChartPreview(
@@ -119,8 +120,8 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
 
                   // 维度度量拖拽区域
                   Container(
-                    height: 150,
-                    margin: const EdgeInsets.only(top: 16),
+                    height: 120, // 略微缩小高度
+                    margin: const EdgeInsets.only(top: 8),
                     child: Row(
                       children: [
                         Expanded(
@@ -141,7 +142,7 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: FieldDropZone(
                             title: '度量',
@@ -166,21 +167,19 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
                 ],
               ),
             ),
+          ),
 
-            const SizedBox(width: 16),
-
-            // 右侧图表类型选择
-            SizedBox(
-              width: 220,
-              child: ChartRightPanel(
-                selectedType: chartType,
-                onTypeChanged: (type) {
-                  setState(() => chartType = type);
-                },
-              ),
+          // 右侧图表类型选择
+          SizedBox(
+            width: 200, // 略微缩小宽度
+            child: ChartRightPanel(
+              selectedType: chartType,
+              onTypeChanged: (type) {
+                setState(() => chartType = type);
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
