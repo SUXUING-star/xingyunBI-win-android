@@ -1,6 +1,7 @@
 // lib/widgets/chart/layouts/chart_right_panel.dart
 import 'package:flutter/material.dart';
 import '../../../core/config/chart_types.dart';
+import 'dart:io';
 
 class ChartRightPanel extends StatelessWidget {
   final String selectedType;
@@ -14,16 +15,17 @@ class ChartRightPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAndroid = Platform.isAndroid;
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
+          Padding(
+            padding: EdgeInsets.all(isAndroid ? 12 : 16),
             child: Text(
               '图表类型',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: isAndroid ? 14 : 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -31,7 +33,7 @@ class ChartRightPanel extends StatelessWidget {
           const Divider(height: 1),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(isAndroid ? 4 : 8),
               children: [
                 for (final type in ChartType.values)
                   _buildChartTypeOption(context, type),
@@ -45,6 +47,7 @@ class ChartRightPanel extends StatelessWidget {
 
   Widget _buildChartTypeOption(BuildContext context, ChartType type) {
     final isSelected = selectedType == type.name;
+    final isAndroid = Platform.isAndroid;
 
     IconData getIconForType(ChartType type) {
       switch (type) {
@@ -72,22 +75,31 @@ class ChartRightPanel extends StatelessWidget {
     }
 
     return Card(
-      color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+      color: isSelected ? Theme
+          .of(context)
+          .primaryColor
+          .withOpacity(0.1) : null,
       child: InkWell(
         onTap: () => onTypeChanged(type.name),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(isAndroid ? 8 : 12),
           child: Row(
             children: [
               Icon(
                 getIconForType(type),
-                color: isSelected ? Theme.of(context).primaryColor : null,
+                size: isAndroid ? 18 : 24,
+                color: isSelected ? Theme
+                    .of(context)
+                    .primaryColor : null,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: isAndroid ? 8 : 12),
               Text(
                 type.label,
                 style: TextStyle(
-                  color: isSelected ? Theme.of(context).primaryColor : null,
+                  fontSize: isAndroid ? 12 : 14,
+                  color: isSelected ? Theme
+                      .of(context)
+                      .primaryColor : null,
                   fontWeight: isSelected ? FontWeight.bold : null,
                 ),
               ),

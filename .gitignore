@@ -17,6 +17,7 @@ ios/
 linux/
 macos/
 test/
+build/
 
 # IntelliJ related
 *.iml

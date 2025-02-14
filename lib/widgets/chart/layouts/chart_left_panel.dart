@@ -23,12 +23,13 @@ class _ChartLeftPanelState extends State<ChartLeftPanel> {
   Widget build(BuildContext context) {
     final isAndroid = Platform.isAndroid;
     return SizedBox(
-      width: isAndroid? 120 : 200,
+      width: isAndroid ? 140 : 200,
       child: Column(
         children: [
+          // 选择数据源卡片
           Card(
             child: Padding(
-              padding: EdgeInsets.all(isAndroid? 8.0 : 16.0),
+              padding: EdgeInsets.all(isAndroid ? 8.0 : 16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -36,44 +37,76 @@ class _ChartLeftPanelState extends State<ChartLeftPanel> {
                   Text(
                     '选择数据源',
                     style: TextStyle(
-                      fontSize: isAndroid? 12.0 : 16.0,
-                      fontWeight: FontWeight.bold,
+                      fontSize: isAndroid ? 11.0 : 13.0, // 减小标题文字大小
+                      fontWeight: FontWeight.w500, // 调整字重
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
                     ),
                   ),
-                  SizedBox(height: isAndroid? 8.0 : 16.0),
+                  SizedBox(height: isAndroid ? 6.0 : 8.0),
                   ValueListenableBuilder(
                     valueListenable: Hive.box('dataSources').listenable(),
                     builder: (context, box, child) {
                       final dataSources = box.values.toList().cast<DataSource>();
 
-                      // 检查数据源列表是否为空
                       if (dataSources.isEmpty) {
-                        return const Text('暂无可用数据源');
+                        return Text(
+                          '暂无可用数据源',
+                          style: TextStyle(
+                            fontSize: isAndroid ? 11.0 : 13.0,
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                        );
                       }
 
-                      // 确保下拉菜单项的值唯一性
                       final items = dataSources.map((source) {
                         return DropdownMenuItem<DataSource>(
                           value: source,
                           child: Text(
                             source.name,
+                            style: TextStyle(
+                              fontSize: isAndroid ? 11.0 : 13.0, // 减小下拉菜单文字大小
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         );
                       }).toList();
 
-                      // 验证选中的值是否在可选项中
                       final isValidSelection = widget.selectedDataSource == null ||
                           dataSources.any((source) => source == widget.selectedDataSource);
 
-                      return DropdownButton<DataSource>(
-                        value: isValidSelection ? widget.selectedDataSource : null,
-                        hint: const Text('选择数据源'),
-                        isExpanded: true,
-                        items: items,
-                        onChanged: (value) {
-                          widget.onDataSourceChanged(value);
-                        },
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          // 自定义下拉菜单样式
+                          textTheme: Theme.of(context).textTheme.copyWith(
+                            bodyMedium: TextStyle(
+                              fontSize: isAndroid ? 11.0 : 13.0,
+                            ),
+                          ),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: isAndroid ? 6.0 : 8.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Theme.of(context).dividerColor),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: DropdownButton<DataSource>(
+                              value: isValidSelection ? widget.selectedDataSource : null,
+                              hint: Text(
+                                '选择数据源',
+                                style: TextStyle(
+                                  fontSize: isAndroid ? 11.0 : 13.0,
+                                ),
+                              ),
+                              isExpanded: true,
+                              items: items,
+                              onChanged: (value) {
+                                widget.onDataSourceChanged(value);
+                              },
+                              menuMaxHeight: 300, // 限制下拉菜单高度
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -81,7 +114,8 @@ class _ChartLeftPanelState extends State<ChartLeftPanel> {
               ),
             ),
           ),
-          SizedBox(height: isAndroid? 4.0 : 8.0),
+          SizedBox(height: isAndroid ? 4.0 : 8.0),
+          // 可用字段列表
           Expanded(
             child: widget.selectedDataSource == null
                 ? const Card(
@@ -97,8 +131,9 @@ class _ChartLeftPanelState extends State<ChartLeftPanel> {
 
 class _FieldList extends StatelessWidget {
   final DataSource dataSource;
+  final ScrollController _scrollController = ScrollController();
 
-  const _FieldList({required this.dataSource});
+  _FieldList({required this.dataSource});
 
   @override
   Widget build(BuildContext context) {
@@ -109,21 +144,31 @@ class _FieldList extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: EdgeInsets.all(isAndroid? 8.0 : 16.0),
+            padding: EdgeInsets.all(isAndroid ? 8.0 : 16.0),
             child: Text(
               '可用字段',
               style: TextStyle(
-                fontSize: isAndroid? 12.0 : 16.0,
-                fontWeight: FontWeight.bold,
+                fontSize: isAndroid ? 11.0 : 13.0,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
           ),
           const Divider(height: 1),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: dataSource.fields.length,
-              itemBuilder: (context, index) => _buildDraggableField(dataSource.fields[index]),
+            child: Scrollbar(
+              controller: _scrollController,
+              thumbVisibility: true,
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: EdgeInsets.all(isAndroid ? 4 : 8),
+                itemCount: dataSource.fields.length,
+                itemBuilder: (context, index) => _buildDraggableField(
+                  context,
+                  dataSource.fields[index],
+                  index,
+                ),
+              ),
             ),
           ),
         ],
@@ -131,15 +176,19 @@ class _FieldList extends StatelessWidget {
     );
   }
 
-  Widget _buildDraggableField(Field field) {
+  Widget _buildDraggableField(BuildContext context, Field field, int index) {
     final isAndroid = Platform.isAndroid;
-    return Draggable<Field>(
+    return LongPressDraggable<Field>(  // 改用 LongPressDraggable
       data: field,
+      delay: const Duration(milliseconds: 150),  // 添加一个短暂的延迟
       feedback: Material(
         elevation: 4,
         borderRadius: BorderRadius.circular(4),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: isAndroid ? 8 : 12,
+            vertical: isAndroid ? 6 : 8,
+          ),
           decoration: BoxDecoration(
             color: Colors.blue.withOpacity(0.9),
             borderRadius: BorderRadius.circular(4),
@@ -147,30 +196,49 @@ class _FieldList extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.drag_indicator,
-                size: 16,
+                size: isAndroid ? 14 : 16,
                 color: Colors.white,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: isAndroid ? 4 : 8),
               Text(
                 field.name,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: isAndroid ? 11 : 13,
+                ),
               ),
             ],
           ),
         ),
       ),
       child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 4),
+        margin: EdgeInsets.symmetric(vertical: isAndroid ? 2 : 4),
         child: ListTile(
           dense: true,
-          leading: const Icon(
-            Icons.drag_indicator,
-            size: 20,
+          visualDensity: VisualDensity.compact,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: isAndroid ? 8 : 12,
+            vertical: isAndroid ? 2 : 4,
           ),
-          title: Text(field.name),
-          subtitle: Text(field.type),
+          leading: Icon(
+            Icons.drag_indicator,
+            size: isAndroid ? 16 : 18,
+            color: Colors.grey.shade600,
+          ),
+          title: Text(
+            field.name,
+            style: TextStyle(
+              fontSize: isAndroid ? 11 : 13,
+            ),
+          ),
+          subtitle: Text(
+            field.type,
+            style: TextStyle(
+              fontSize: isAndroid ? 10 : 12,
+            ),
+          ),
         ),
       ),
     );

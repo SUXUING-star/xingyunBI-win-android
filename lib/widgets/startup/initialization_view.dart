@@ -91,7 +91,7 @@ class _InitializationViewState extends State<InitializationView>
                       child: const SizedBox(
                         width: 180,
                         height: 180,
-                        child: AppLogo(size: 48),
+                        child: AppLogo(size: 32),
                       ),
                     );
                   },
@@ -137,7 +137,7 @@ class _InitializationViewState extends State<InitializationView>
                   '星云BI',
                   style: TextStyle(
                     color: Colors.blue[400],
-                    fontSize: 24,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

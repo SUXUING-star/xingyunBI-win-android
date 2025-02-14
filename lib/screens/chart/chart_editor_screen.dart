@@ -7,6 +7,7 @@ import '../../widgets/chart/layouts/chart_right_panel.dart';
 import '../../widgets/chart/layouts/field_drop_zone.dart';
 import 'package:uuid/uuid.dart';
 import '../../widgets/chart/layouts/chart_left_panel.dart';
+import 'dart:io';
 
 class ChartEditorScreen extends StatefulWidget {
   final DataSource? initialDataSource;
@@ -49,21 +50,52 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isAndroid = Platform.isAndroid;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.chart == null ? '新建图表' : '编辑图表'),
-        actions: [
-          TextButton(
-            onPressed: _canSave() ? _saveChart : null,
-            child: const Text('保存'),
-          ),
-        ],
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  controller: nameController,
+                  style: TextStyle(
+                    fontSize: isAndroid ? 14 : 16,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: '请输入图表名称',
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: isAndroid ? 8 : 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                  ),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: _canSave() ? _saveChart : null,
+              child: Text(
+                '保存',
+                style: TextStyle(fontSize: isAndroid ? 13 : 14),
+              ),
+            ),
+            SizedBox(width: isAndroid ? 8 : 16),
+          ],
+        ),
       ),
       body: Row(
         children: [
           // 左侧数据源选择区域
           SizedBox(
-            width: 180, // 略微缩小宽度
+            width: isAndroid ? 140 : 180,
             child: ChartLeftPanel(
               selectedDataSource: selectedDataSource,
               onDataSourceChanged: (value) {
@@ -78,28 +110,17 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
 
           // 中间区域
           Expanded(
-            flex: 3, // 增加中间区域的权重
+            flex: 3,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.symmetric(horizontal: isAndroid ? 4 : 8),
               child: Column(
                 children: [
-                  // 图表名称输入
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: '图表名称',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
                   // 图表预览区域
                   Expanded(
                     flex: 2,
                     child: Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(isAndroid ? 4 : 8),
                         child: selectedDataSource == null
                             ? const Center(child: Text('请选择数据源'))
                             : ChartPreview(
@@ -120,8 +141,8 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
 
                   // 维度度量拖拽区域
                   Container(
-                    height: 120, // 略微缩小高度
-                    margin: const EdgeInsets.only(top: 8),
+                    height: isAndroid ? 100 : 120,
+                    margin: EdgeInsets.only(top: isAndroid ? 4 : 8),
                     child: Row(
                       children: [
                         Expanded(
@@ -142,7 +163,7 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: isAndroid ? 4 : 8),
                         Expanded(
                           child: FieldDropZone(
                             title: '度量',
@@ -171,7 +192,7 @@ class _ChartEditorScreenState extends State<ChartEditorScreen> {
 
           // 右侧图表类型选择
           SizedBox(
-            width: 200, // 略微缩小宽度
+            width: isAndroid ? 160 : 200,
             child: ChartRightPanel(
               selectedType: chartType,
               onTypeChanged: (type) {

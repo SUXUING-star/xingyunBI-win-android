@@ -10,6 +10,7 @@ import 'widgets/startup/initialization_view.dart';
 class App extends StatelessWidget {
   const App({super.key});
 
+// lib/app.dart
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,9 +28,21 @@ class App extends StatelessWidget {
               });
             }
 
-            // 显示初始化界面或主应用路由
+            // 设置更新回调
+            initProvider.noUpdateCallback = () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('已是最新版本')),
+              );
+            };
+
+            initProvider.updateErrorCallback = (error) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('检查更新失败: $error')),
+              );
+            };
+
             return initProvider.isInitialized
-                ? (child ?? const SizedBox()) // 使用路由系统提供的 child
+                ? (child ?? const SizedBox())
                 : InitializationView(
               status: initProvider.error != null
                   ? InitializationStatus.error

@@ -8,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'app.dart';
 import 'core/providers/initialization_provider.dart';
+import 'services/update_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => UpdateService()),
         ChangeNotifierProvider(create: (_) => InitializationProvider()),
       ],
       child: const App(),
